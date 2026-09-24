@@ -1,7 +1,15 @@
 from fastapi import APIRouter
 from sqlalchemy import text
-from repomind.services.github_service import get_repository
+
 from repomind.db.database import engine
+
+from repomind.services.github_service import (
+    get_repository,
+    get_repository_files,
+    get_repository_folder,
+    get_repository_file,
+    get_repository_commits
+)
 
 
 router = APIRouter()
@@ -9,7 +17,9 @@ router = APIRouter()
 
 @router.get("/")
 def root():
-    return {"message": "Welcome to RepoMind"}
+    return {
+        "message": "Welcome to RepoMind"
+    }
 
 
 @router.get("/health")
@@ -32,8 +42,14 @@ def health_check():
 
 
 @router.get("/github/{owner}/{repo}")
-def github_repository(owner: str, repo: str):
-    repository = get_repository(owner, repo)
+def github_repository(
+    owner: str,
+    repo: str
+):
+    repository = get_repository(
+        owner,
+        repo
+    )
 
     if repository is None:
         return {
@@ -49,3 +65,79 @@ def github_repository(owner: str, repo: str):
         "forks": repository["forks_count"],
         "url": repository["html_url"],
     }
+
+
+@router.get("/github/{owner}/{repo}/files")
+def github_repository_files(
+    owner: str,
+    repo: str
+):
+    files = get_repository_files(
+        owner,
+        repo
+    )
+
+    if files is None:
+        return {
+            "message": "Repository files not found"
+        }
+
+    return files
+
+
+@router.get("/github/{owner}/{repo}/files/{path:path}")
+def github_repository_folder(
+    owner: str,
+    repo: str,
+    path: str
+):
+    files = get_repository_folder(
+        owner,
+        repo,
+        path
+    )
+
+    if files is None:
+        return {
+            "message": "Folder not found"
+        }
+
+    return files
+
+
+@router.get("/github/{owner}/{repo}/file/{path:path}")
+def github_repository_file(
+    owner: str,
+    repo: str,
+    path: str
+):
+    file = get_repository_file(
+        owner,
+        repo,
+        path
+    )
+
+    if file is None:
+        return {
+            "message": "File not found"
+        }
+
+    return file
+
+
+@router.get("/github/{owner}/{repo}/commits")
+def github_repository_commits(
+    owner: str,
+    repo: str
+):
+    commits = get_repository_commits(
+        owner,
+        repo
+    )
+
+    if commits is None:
+        return {
+            "message": "Repository commits not found"
+        }
+
+    return commits
