@@ -1,7 +1,5 @@
 from openai import OpenAI
 
-from openai import OpenAI
-
 from src.repomind.core.config import OPENAI_API_KEY
 
 
@@ -20,16 +18,29 @@ def create_embedding(text: str):
     return response.data[0].embedding
 
 
-def create_embeddings(texts: list[str]):
+def create_embeddings(
+    texts: list[str],
+    batch_size: int = 100
+):
 
-    response = client.embeddings.create(
-        model="text-embedding-3-small",
-        input=texts
-    )
+    all_embeddings = []
 
-    embeddings = []
+    for i in range(0, len(texts), batch_size):
 
-    for item in response.data:
-        embeddings.append(item.embedding)
+        batch = texts[i:i + batch_size]
 
-    return embeddings
+        response = client.embeddings.create(
+            model="text-embedding-3-small",
+            input=batch
+        )
+
+        for item in response.data:
+            all_embeddings.append(
+                item.embedding
+            )
+
+        print(
+            f"Embedded {min(i + batch_size, len(texts))}/{len(texts)} chunks"
+        )
+
+    return all_embeddings

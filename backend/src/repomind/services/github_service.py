@@ -19,16 +19,38 @@ def get_repository(
 
 def get_repository_files(
     owner: str,
-    repo: str
+    repo: str,
+    path: str = ""
 ):
-    url = f"https://api.github.com/repos/{owner}/{repo}/contents"
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
 
     response = httpx.get(url)
 
     if response.status_code != 200:
         return None
 
-    return response.json()
+    items = response.json()
+
+    all_files = []
+
+    for item in items:
+
+        if item["type"] == "file":
+
+            all_files.append(item)
+
+        elif item["type"] == "dir":
+
+            folder_files = get_repository_files(
+                owner,
+                repo,
+                item["path"]
+            )
+
+            if folder_files:
+                all_files.extend(folder_files)
+
+    return all_files
 
 
 def get_repository_folder(
@@ -63,6 +85,7 @@ def get_repository_file(
     content = file_data.get("content")
 
     if content:
+
         decoded_content = base64.b64decode(
             content
         ).decode("utf-8")
@@ -88,6 +111,7 @@ def get_repository_commits(
     result = []
 
     for commit in commits:
+
         result.append({
             "sha": commit["sha"],
             "message": commit["commit"]["message"],

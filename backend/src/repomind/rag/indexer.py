@@ -33,7 +33,9 @@ def index_repository(
             chunk_id=f"{owner}-{repo}-{index}",
             content=chunk["content"],
             embedding=embeddings[index],
-            file_path=chunk["file"]
+            file_path=chunk["file"],
+            owner=owner,
+            repo=repo
         )
 
         print(
