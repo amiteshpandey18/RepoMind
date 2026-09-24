@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from sqlalchemy import text
-
+from repomind.services.github_service import get_repository
 from repomind.db.database import engine
 
 
@@ -29,3 +29,23 @@ def health_check():
             "database": "disconnected",
             "error": str(e),
         }
+
+
+@router.get("/github/{owner}/{repo}")
+def github_repository(owner: str, repo: str):
+    repository = get_repository(owner, repo)
+
+    if repository is None:
+        return {
+            "message": "Repository not found"
+        }
+
+    return {
+        "name": repository["name"],
+        "full_name": repository["full_name"],
+        "description": repository["description"],
+        "language": repository["language"],
+        "stars": repository["stargazers_count"],
+        "forks": repository["forks_count"],
+        "url": repository["html_url"],
+    }

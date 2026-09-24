@@ -1,31 +1,40 @@
-# Python-generated files
+# =========================
+# Backend - Python
+# =========================
+
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
+*.pyc
+*.pyo
+*.egg-info/
 
-# Virtual environments
-.venv
-
-.env
+# Python virtual environment
+.venv/
 
 # Environment variables
 .env
 
-# Virtual environment
-.venv/
+# Python build files
+build/
+dist/
+wheels/
 
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
+# =========================
+# Frontend - React / Node
+# =========================
 
+node_modules/
+dist/
+
+# =========================
 # IDE
+# =========================
+
 .vscode/
 .idea/
 
-# OS files
+# =========================
+# OS
+# =========================
+
 .DS_Store
 Thumbs.db
