@@ -15,3 +15,5 @@ chromadb
 langchain
 langchain-openai
 langchain-text-splitters
+
+mcp
