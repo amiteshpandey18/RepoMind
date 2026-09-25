@@ -17,3 +17,6 @@ langchain-openai
 langchain-text-splitters
 
 mcp
+
+langgraph-checkpoint-postgres
+psycopg[binary]

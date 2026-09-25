@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-from src.repomind.core.config import OPENAI_API_KEY
+from repomind.core.config import OPENAI_API_KEY
 
 
 client = OpenAI(

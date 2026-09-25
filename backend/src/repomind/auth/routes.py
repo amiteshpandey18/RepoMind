@@ -1,15 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from repomind.auth.schemas import UserCreate, UserLogin
+from repomind.db.database import get_db
+from repomind.db.models.user import User
+
+from repomind.auth.schemas import (
+    UserCreate,
+    UserLogin,
+    Token
+)
+
 from repomind.auth.security import (
     hash_password,
     verify_password,
     create_access_token,
     get_current_user
 )
-from repomind.db.database import get_db
-from repomind.db.models.user import User
 
 
 router = APIRouter(
@@ -19,11 +25,24 @@ router = APIRouter(
 
 
 @router.post("/register")
-def register_user(
+def register(
     user: UserCreate,
     db: Session = Depends(get_db)
 ):
-    hashed_password = hash_password(user.password)
+
+    existing_user = db.query(User).filter(
+        User.email == user.email
+    ).first()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
+
+    hashed_password = hash_password(
+        user.password
+    )
 
     new_user = User(
         username=user.username,
@@ -36,40 +55,39 @@ def register_user(
     db.refresh(new_user)
 
     return {
-        "message": "User registered successfully",
-        "username": new_user.username,
-        "email": new_user.email
+        "message": "User registered successfully"
     }
 
 
-@router.post("/login")
-def login_user(
+@router.post("/login", response_model=Token)
+def login(
     user: UserLogin,
     db: Session = Depends(get_db)
 ):
-    db_user = db.query(User).filter(
+
+    existing_user = db.query(User).filter(
         User.email == user.email
     ).first()
 
-    if db_user is None:
+    if not existing_user:
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password"
         )
 
-    password_valid = verify_password(
+    if not verify_password(
         user.password,
-        db_user.hashed_password
-    )
-
-    if not password_valid:
+        existing_user.hashed_password
+    ):
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password"
         )
 
     access_token = create_access_token(
-        data={"sub": str(db_user.id)}
+        {
+            "sub": str(existing_user.id)
+        }
     )
 
     return {
@@ -79,10 +97,23 @@ def login_user(
 
 
 @router.get("/me")
-def get_current_user_info(
-    user_id: str = Depends(get_current_user)
+def get_me(
+    user_id: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
+
+    user = db.query(User).filter(
+        User.id == int(user_id)
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
     return {
-        "message": "You are authenticated",
-        "user_id": user_id
+        "id": user.id,
+        "username": user.username,
+        "email": user.email
     }

@@ -19,8 +19,10 @@ async def main():
     async with Client(server) as client:
 
         result = await client.call_tool(
-            "get_commits",
-            {}
+            "search_repository",
+            {
+                "question": "What authentication does this project use?"
+            }
         )
 
         print()
@@ -30,7 +32,5 @@ async def main():
 
         for content in result.content:
             print(content.text)
-
-
 if __name__ == "__main__":
     asyncio.run(main())

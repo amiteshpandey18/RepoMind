@@ -5,7 +5,10 @@ import sys
 from mcp import Client, StdioServerParameters
 
 
-async def call_mcp_tool(tool_name: str, arguments: dict):
+async def call_mcp_tool(
+    tool_name: str,
+    arguments: dict
+):
 
     server = StdioServerParameters(
         command=sys.executable,
@@ -26,7 +29,10 @@ async def call_mcp_tool(tool_name: str, arguments: dict):
         return result.content[0].text
 
 
-def run_mcp_tool(tool_name: str, arguments: dict):
+def run_mcp_tool(
+    tool_name: str,
+    arguments: dict
+):
 
     return asyncio.run(
         call_mcp_tool(

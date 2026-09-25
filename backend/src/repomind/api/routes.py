@@ -11,6 +11,9 @@ from repomind.services.github_service import (
     get_repository_commits
 )
 
+from repomind.rag.indexer import index_repository
+from repomind.rag.vector_store import repository_is_indexed
+
 
 router = APIRouter()
 
@@ -56,6 +59,27 @@ def github_repository(
             "message": "Repository not found"
         }
 
+    if repository_is_indexed(owner, repo):
+        print(
+            f"Repository already indexed: {owner}/{repo}"
+        )
+
+        total_chunks = 0
+
+    else:
+        print(
+            f"Indexing repository: {owner}/{repo}"
+        )
+
+        total_chunks = index_repository(
+            owner,
+            repo
+        )
+
+        print(
+            f"Repository indexed: {total_chunks} chunks"
+        )
+
     return {
         "name": repository["name"],
         "full_name": repository["full_name"],
@@ -64,6 +88,7 @@ def github_repository(
         "stars": repository["stargazers_count"],
         "forks": repository["forks_count"],
         "url": repository["html_url"],
+        "indexed_chunks": total_chunks
     }
 
 
